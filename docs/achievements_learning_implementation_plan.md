@@ -7,6 +7,11 @@
 - **Custom sub-module:** `achievements_learning`
 - **Install path:** `web/modules/custom/achievements_learning`
 
+Anu LMS context
+- lessons use bundle `module_lesson`
+- quizzes use bundle `module_assessment`
+- courses use bundle `course`
+
 ## Purpose of this document
 This plan turns the approved product design into an implementation roadmap for the first twelve feature areas previously defined for `achievements_learning`.
 
@@ -24,6 +29,20 @@ This plan assumes the following approved defaults:
 - section completion: all lessons/quizzes in the relevant module paragraph completed
 - reward scope: reward choice applies only to major course-completion identity milestones in v1
 - title priority: the approved thirteen-title priority list governs the displayed title
+- this is the list
+    1. Truth Seeker
+    2. Clarity Builder
+    3. Evidence Examiner
+    4. Faith Defender
+    5. Clear Thinker
+    6. Dignity Defender
+    7. Moral Thinker
+    8. Justice-Seeker
+    9. Wise Decision-Maker
+    10. Made by Love, for Love
+    11. Learning to Love in Truth
+    12. Integrated Person
+    13. Authentic Lover
 
 ---
 
@@ -157,13 +176,10 @@ Treat a section as complete when all lessons/quizzes in the relevant module para
 
 ### Implementation tasks
 1. Create `LearningSectionManager`.
-2. Inspect Anu LMS content structure to identify how module paragraphs reference lessons and assessments/quizzes.
-3. Build helper methods for:
-   - locating section paragraphs containing a lesson
-   - extracting lesson and quiz references from a section
-   - determining whether all required child items are complete for a user
-4. Normalize completion checks so lessons and quizzes can be compared in one API.
-5. Cache expensive content graph lookups where practical.
+2. Section = Anu LMS module paragraph
+   - completion = all referenced `module_lesson` and `module_assessment` items complete
+3. Normalize completion checks so lessons and quizzes can be compared in one API.
+4. Cache expensive content graph lookups where practical.
 
 ### Dependencies
 - Anu LMS paragraph structure
@@ -182,11 +198,10 @@ Derive course completion reliably from Anu LMS course data and use it for achiev
 ### Implementation tasks
 1. Create `LearningCourseManager`.
 2. Determine the canonical relationship between lesson nodes and course nodes in Anu LMS.
-3. Determine whether Anu LMS exposes a reusable course progress service/API.
-4. Implement methods to:
-   - find a course from a lesson
-   - determine whether a course is complete for a user
-   - enumerate lessons/sections that belong to a course when needed
+3. Anu LMS exposes a reusable course progress service/API:
+   - reuse `anu_lms.lesson` to resolve lesson → course
+   - reuse `anu_lms.course_progress` as the canonical v1 course-progress service
+   - derive course completion from its progress data
 5. Connect course completion outcomes to:
    - course-count achievements
    - course-specific milestones
@@ -212,12 +227,13 @@ Award achievements for meaningful forum participation while excluding staff/admi
 ### Implementation tasks
 1. Create `LearningForumManager`.
 2. Hook into topic creation for `node` bundle `forum`.
-3. Hook into `comment` creation for bundle `comment_forum`.
-4. Reject unpublished content.
-5. Reject users with excluded roles from configuration.
-6. Maintain forum topic and reply counters.
-7. Evaluate the configured forum milestone rules after each eligible insert.
-8. Recompute titles if a title-bearing forum milestone is unlocked.
+3. Verify the exact forum topic node bundle in the target site before finalizing hook logic.
+4. Hook into `comment` creation for bundle `comment_forum`.
+5. Reject unpublished content.
+6. Reject users with excluded roles from configuration.
+7. Maintain forum topic and reply counters.
+8. Evaluate the configured forum milestone rules after each eligible insert.
+9. Recompute titles if a title-bearing forum milestone is unlocked.
 
 ### Acceptance criteria
 Student-created published topics/replies increment the right counters and trigger the right milestones, while teacher/admin activity is ignored.
@@ -236,6 +252,7 @@ For `module_lesson`:
 - `field_completion_email_body`
 - `field_parent_completion_email_subject`
 - `field_parent_completion_email_body`
+- email body fields should be formatted long text
 
 For user:
 - `field_parent_email`
@@ -406,3 +423,19 @@ Minimum automated coverage for v1 should include:
 
 ### Recommended immediate next step
 Before extending code further, align the existing scaffold to this document and implement Phase 2 from this plan rather than adding more placeholder services.
+
+### Appendix
+Baseline v1 achievements
+    • first lesson
+    • lesson count
+    • 5 lessons
+    • 10 lessons
+    • 25 lessons
+    • first course
+    • 2 courses
+    • 3 courses
+    • first topic
+    • first reply
+    • 5 replies
+    • 10 replies
+
